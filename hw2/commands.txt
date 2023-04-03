@@ -10,6 +10,9 @@ python3 data_inserter.py
 
 Если нам нужен правильный градус, но хочется взять лучшего качества:
 db.test.find({alcohol: {$gt: 13.0}}).sort({quality:-1}).limit(1)
+Также замерим время исполнения запроса:
+db.test.explain('executionStats').find({alcohol: {$gt: 13.0}}).sort({quality:-1}).limit(1)
+executionTimeMillis = 5
 
 Если хотим уменьшить вероятность изжоги, исключим из вариантов слишком кислотные сорта:
 db.test.remove({'fixed acidity': {$gt: 10}})
@@ -20,3 +23,9 @@ db.test.updateMany({alcohol: {$lt: 9}}, {$inc:{quality: -1}})
 Чтобы эти запросы выполнялись быстрее, имеет смысл создать индекс по содержанию алкоголя и по качеству:
 db.test.createIndex({alcohol: 1})
 db.test.createIndex({quality: 1})
+
+Теперь выполняем наш привычный find:
+db.test.explain('executionStats').find({alcohol: {$gt: 13.0}}).sort({quality:-1}).limit(1)
+executionTimeMillis = 3
+
+Ускорение незначительное, потому что в датасете мало записей (1.5к), но даже так ускорение заметно.
